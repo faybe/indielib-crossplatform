@@ -34,6 +34,7 @@
 
 // ----- Includes -----
 #include <vector>
+#include <list>
 #include "IND_Sequence.h"
 #include "IND_Object.h"
 
@@ -107,6 +108,10 @@ The  @b tokens or <b>keywords</b> of a @b IndieLib animation file are:
 class LIB_EXP IND_Animation : public IND_Object{
 public:
     static IND_Animation* newAnimation();
+
+	IND_Animation *createTwin();
+
+	bool removeTwin(IND_Animation *pTwinToBeRemoved);
     
     virtual void destroy();
 	// ----- Public gets ------
@@ -159,35 +164,46 @@ public:
 	//! This function establishes a IND_Image object in a frame. It can be useful for modifying some frames of animations.Note: It is convenient to eliminate any IND_Image object that would be there before setting the actual one.
 	void                    setImage(unsigned int pFrame, IND_Image *pNewImage);
 	//! This function establishes a IND_Surface object in a frame. It can be useful for modifying some frames of animations.Note: It is convenient to eliminate any IND_Surface object that would be there before setting the actual one.
-	void                    setSurface(unsigned int pFrame, IND_Surface *pNewSurface);
+	void                    setSurface(unsigned int pFrame, IND_Surface *pNewSurface);	
 
 private:
 	/** @cond DOCUMENT_PRIVATEAPI */
     IND_Animation() : _vectorFrames(NULL) {
-      	_vectorFrames = new vector <IND_Frame *>;
+      	_vectorFrames =	new vector <IND_Frame *>;
+		_listTwins = new list <IND_Animation *>;
     }
     
     virtual ~IND_Animation() {
-        DISPOSE(_vectorFrames);
+		if (!_animation._isTwin)
+			DISPOSE(_vectorFrames);
+
+		for (auto *twin : *_listTwins) 
+			DISPOSE(twin);
+		
+		DISPOSE(_listTwins);
     }
 	// ----- Structures ------
 
 	vector <IND_Frame *> *_vectorFrames;    // Vector of frames
 
+	list <IND_Animation *> *_listTwins;
+
 	// Animation (list of sequences)
 	struct structAnimation {
 		char *_name;                            // Animation name
 		int _sumSequences;                      // Number of sequences
+		bool _isTwin;
 		vector <IND_Sequence *> *_listSequences; // Sequence list
 		structAnimation() : 
 			_name(NULL),
 			_sumSequences(0),
+			_isTwin(false),
 			_listSequences(NULL) {
                 _name = new char [MAX_TOKEN];
                 _listSequences = new  vector <IND_Sequence *>;
             }
         ~structAnimation() {
-            DISPOSEARRAY(_name);
+			DISPOSEARRAY(_name);
             
             // ----- Free sequences for each animation -----
             // Free all the pointers to SEQUENCE

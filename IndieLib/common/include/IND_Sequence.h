@@ -96,6 +96,29 @@ private:
 
 	SEQUENCE _sequence;
 
+	IND_Sequence *clone() {
+		IND_Sequence *newSequence = new IND_Sequence();
+			
+		newSequence->_sequence.i			=	_sequence.i;
+		newSequence->_sequence._width		=	_sequence._width;			
+		newSequence->_sequence._height		=	_sequence._height;	
+		newSequence->_sequence._numFrames	=	_sequence._numFrames;
+		newSequence->_sequence._isActive	=	_sequence._isActive;
+		strcpy(newSequence->_sequence._name, _sequence._name);
+
+		vector <IND_Sequence::FRAME_TIME *>::iterator mVectorFrameTimeIter;
+        for (mVectorFrameTimeIter  = _sequence._listFrames->begin();
+                mVectorFrameTimeIter  != _sequence._listFrames->end();
+                mVectorFrameTimeIter++) {
+			FRAME_TIME *newFrameTime = new FRAME_TIME;
+			newFrameTime->_pos	= (*mVectorFrameTimeIter)->_pos;
+			newFrameTime->_time = (*mVectorFrameTimeIter)->_time;
+			newSequence->_sequence._listFrames->push_back(newFrameTime);
+        }
+
+		return newSequence;
+	}	
+
 	// ----- Private sets ------
 
 	void                    setActualFramePos(int pPos)              {

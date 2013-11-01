@@ -59,6 +59,66 @@ void IND_Animation::destroy() {
 
 
 /**
+ * Creates a twin of the animation that uses the same frames but can act independently. 
+ * This is useful so animations dont need to be loaded from hdd while in the game loop.
+ * To clean up call removeTwin(). This will not free the frames of the main twin.
+ */
+IND_Animation *IND_Animation::createTwin() {
+
+	IND_Animation * newTwin =	new IND_Animation;
+
+	// Free old vector and point it to vector of this animation
+	DISPOSE(newTwin->_vectorFrames);		
+	newTwin->_vectorFrames = _vectorFrames;		
+
+	// Copy _animation
+	newTwin->_animation._sumSequences = _animation._sumSequences;
+	strcpy(newTwin->_animation._name, _animation._name);
+
+	newTwin->_animation._isTwin = true;
+
+	// Clone all sequences	
+	for (const auto& sequence : *_animation._listSequences) {
+
+		newTwin->_animation._listSequences->push_back(sequence->clone());
+
+		newTwin->_animation._listSequences->back()->getSequenceTimer()->start();
+
+    }	
+
+	// Add new Twin to list of twins
+	_listTwins->push_back(newTwin);
+
+	return newTwin;
+}
+
+/**
+ * Removes a twin of this animation and frees the memory.
+ * Returns 1 (true) if pTwinToBeRemoved is a twin of the animation and
+ * was successfully removed.
+ * @param pTwinToBeRemoved			Pointer to the twin that shall be removed
+ */
+bool IND_Animation::removeTwin(IND_Animation *pTwinToBeRemoved) {
+		
+	// check if pTwinToBeRemoved is a twin of this animation
+	for (const auto *twin : *_listTwins) {
+
+		if (twin == pTwinToBeRemoved) {
+
+			// Remove twin from list
+			_listTwins->remove(pTwinToBeRemoved);
+
+			// Free twin
+			DISPOSE(pTwinToBeRemoved);
+
+			return 1;
+		}
+	}
+
+	return 0;		
+}
+
+/**
  * Get the image of a frame in the animation.
  * @param pFrame			The frame number of a frame in the animation.
  */

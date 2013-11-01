@@ -68,6 +68,9 @@ Indielib_Main
 	// Characters animations, we apply a color key of (0, 48, 152)
 	IND_Animation *mAnimationCharacter2 = IND_Animation::newAnimation();
 	if (!mI->_animationManager->addToSurface(mAnimationCharacter2, "animations/character2.xml", IND_ALPHA, IND_32, 0, 48, 152)) return 0;
+	
+	// Create twin of mAnimationCharacter2 which uses the same frames but can act independently
+	IND_Animation *mAnimationCharacter2_twin = mAnimationCharacter2->createTwin();
 
 	// Dust animation, we apply a color key of (255, 0, 255)
 	IND_Animation *mAnimationDust = IND_Animation::newAnimation();
@@ -90,6 +93,11 @@ Indielib_Main
 	mI->_entity2dManager->add(mPlayer2);					// Entity adding
 	mPlayer2->setAnimation(mAnimationCharacter2);				// Set the animation into the entity
 
+	// Character 3
+	IND_Entity2d *mPlayer3 = IND_Entity2d::newEntity2d();
+	mI->_entity2dManager->add(mPlayer3);					// Entity adding
+	mPlayer3->setAnimation(mAnimationCharacter2_twin);				// Set the animation into the entity
+
 	// Dust explosion
 	IND_Entity2d *mDust = IND_Entity2d::newEntity2d();
 	mI->_entity2dManager->add(mDust);					// Entity adding
@@ -110,6 +118,11 @@ Indielib_Main
 	mPlayer2->setPosition(550, 200, 0);				
 	mPlayer2->setNumReplays(3);						// The animation will be displayed 3 times
 
+	// Player 3
+	mPlayer3->setSequence(0);						// Choose sequence
+	mPlayer3->setPosition(350, 400, 0);	
+	mPlayer3->setFade(255,255,255,100);
+	
 	// ----- Main Loop -----
 
 	while (!mI->_input->onKeyPress(IND_ESCAPE) && !mI->_input->quit())
